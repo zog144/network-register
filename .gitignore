@@ -1,0 +1,7 @@
+
+# Build/install artifacts belong outside the source tree
+*.whl
+*.egg
+*.egg-info/
+/dist/
+/build/

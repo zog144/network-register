@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=80,<83"]
+build-backend = "setuptools.build_meta"
+
+# Component-development metadata only. Public Python publication is the
+# aggregate "zog" distribution assembled by release-build.
+[project]
+name = "network-register"
+dynamic = ["version"]
+description = "Zog delegated-account Cloudflare and Porkbun registration and DNS tooling"
+requires-python = ">=3.11"
+dependencies = []
+license = "BSD-3-Clause OR GPL-3.0-only"
+license-files = ["LICENSE", "LICENSES/*.txt", "THIRD-PARTY-NOTICES.md"]
+
+[project.optional-dependencies]
+dns = ["dnspython>=2.8,<3"]
+
+[project.scripts]
+network-register = "zog.network_register.cli:main"
+
+[tool.setuptools.dynamic]
+version = {attr = "zog.network_register.__version__"}
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["zog.network_register*"]
+namespaces = true

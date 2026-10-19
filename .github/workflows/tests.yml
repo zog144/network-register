@@ -1,0 +1,69 @@
+name: Public network-register source checks
+
+on:
+  push:
+    branches: [unstable, main]
+  pull_request:
+    branches: [unstable, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Checkout source (no persisted credentials)
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5 Node24
+        with:
+          persist-credentials: false
+      - name: Prepare Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6 Node24
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Check public source boundaries
+        run: python tools/public_source_preflight.py
+      - name: Install bounded build/test dependencies
+        run: |
+          python -m pip install "setuptools==82.0.1" "wheel==0.45.1" "build==1.6.1"
+          python -m pip install --no-build-isolation '.[dns]'
+      - name: Compile first-party source and tests
+        env:
+          PYTHONPYCACHEPREFIX: ${{ runner.temp }}/network-register-pycache
+        run: python -m compileall -q src tests
+      - name: Isolated mock-provider unit tests
+        run: |
+          python -m unittest discover -s tests -v
+          python -m zog.network_register --help
+          python -c "import zog.network_register; assert zog.network_register.__version__ == '0.12.0'"
+      - name: Build source-only Python artifacts locally
+        run: |
+          mkdir -p "$RUNNER_TEMP/network-register-source" "$RUNNER_TEMP/network-register-dist"
+          git archive HEAD | tar -x -C "$RUNNER_TEMP/network-register-source"
+          python -m build --no-isolation --outdir "$RUNNER_TEMP/network-register-dist" "$RUNNER_TEMP/network-register-source"
+      - name: Confirm source licensing in artifacts
+        run: |
+          python - "$RUNNER_TEMP/network-register-dist" <<'PY'
+          import sys,tarfile,zipfile,pathlib
+          out=pathlib.Path(sys.argv[1]); wheels=list(out.glob("*.whl"));sdists=list(out.glob("*.tar.gz"))
+          assert len(wheels)==1 and len(sdists)==1
+          with zipfile.ZipFile(wheels[0]) as w:
+              names=w.namelist()
+              assert "zog/network_register/__init__.py" in names
+              assert any(n.endswith("/LICENSE") for n in names)
+              assert any(n.endswith("/THIRD-PARTY-NOTICES.md") for n in names)
+          with tarfile.open(sdists[0],"r:gz") as tar:
+              names=tar.getnames()
+              assert not any("/recovery/" in x or x.endswith("/COPYRIGHT") or x.endswith(".whl") for x in names)
+              assert any(x.endswith("/THIRD-PARTY-NOTICES.md") for x in names)
+          PY
+
+# No registrar purchase, DNS record mutation, AWS/host provisioning, credentials,
+# artifact upload, package publication or live execution in this workflow.
