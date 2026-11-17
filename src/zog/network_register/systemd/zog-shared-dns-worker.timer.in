@@ -1,0 +1,12 @@
+[Unit]
+Description=Schedule Zog shared DNS reconciliation (no legacy writer)
+
+[Timer]
+OnBootSec=2min
+OnUnitInactiveSec=5min
+RandomizedDelaySec=30s
+AccuracySec=15s
+Unit=zog-shared-dns-worker.service
+
+[Install]
+WantedBy=timers.target

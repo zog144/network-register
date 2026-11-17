@@ -1,0 +1,28 @@
+[Unit]
+Description=Zog supported shared DNS reconciliation worker
+Documentation=https://github.com/zog144/network-register
+After=network-online.target
+Wants=network-online.target
+Conflicts=host-dns-reconcile.service
+RequiresMountsFor=@STATE_DIRECTORY@ @RECEIPT_DIRECTORY@
+
+[Service]
+Type=oneshot
+User=@SERVICE_USER@
+Group=@SERVICE_GROUP@
+WorkingDirectory=@WORKING_DIRECTORY@
+EnvironmentFile=@ENVIRONMENT_FILE@
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=@PYTHON@ -B -m zog.network_register.scheduled_worker --receipt-dir @RECEIPT_DIRECTORY@ @MODE_ARG@
+TimeoutStartSec=10min
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=@STATE_DIRECTORY@ @RECEIPT_DIRECTORY@
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=zog-shared-dns-worker
+
+# No [Install] section: only the separately approved timer is enabled.

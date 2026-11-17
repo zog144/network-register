@@ -18,6 +18,8 @@ dns = ["dnspython>=2.8,<3"]
 
 [project.scripts]
 network-register = "zog.network_register.cli:main"
+zog-shared-dns-worker = "zog.network_register.scheduled_worker:main"
+zog-shared-dns-units = "zog.network_register.worker_units:main"
 
 [tool.setuptools.dynamic]
 version = {attr = "zog.network_register.__version__"}
@@ -29,3 +31,6 @@ package-dir = {"" = "src"}
 where = ["src"]
 include = ["zog.network_register*"]
 namespaces = true
+
+[tool.setuptools.package-data]
+"zog.network_register" = ["systemd/*.service.in", "systemd/*.timer.in"]

@@ -4,13 +4,18 @@
   "python_package": "zog.network_register",
   "version": "0.12.0",
   "scripts": {
-    "network-register": "zog.network_register.cli:main"
+    "network-register": "zog.network_register.cli:main",
+    "zog-shared-dns-worker": "zog.network_register.scheduled_worker:main",
+    "zog-shared-dns-units": "zog.network_register.worker_units:main"
   },
   "component_dependencies": [],
   "external_dependencies": [
     "dnspython>=2.8,<3"
   ],
-  "package_data": [],
+  "package_data": [
+    "systemd/zog-shared-dns-worker.service.in",
+    "systemd/zog-shared-dns-worker.timer.in"
+  ],
   "license_notice_paths": [
     "LICENSE",
     "LICENSES/BSD-3-Clause.txt",

@@ -57,6 +57,8 @@ jobs:
           with zipfile.ZipFile(wheels[0]) as w:
               names=w.namelist()
               assert "zog/network_register/__init__.py" in names
+              for unit in ("service", "timer"):
+                  assert "zog/network_register/systemd/zog-shared-dns-worker." + unit + ".in" in names
               assert any(n.endswith("/LICENSE") for n in names)
               assert any(n.endswith("/THIRD-PARTY-NOTICES.md") for n in names)
           with tarfile.open(sdists[0],"r:gz") as tar:
