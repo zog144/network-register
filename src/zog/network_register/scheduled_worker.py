@@ -117,7 +117,9 @@ def station_cycle(*, inspect_only=False):
                     for key, n in _preview_scope(selected, src, api).items():
                         results[key] = results.get(key, 0) + n
             else:
-                results = dns_shared.reconcile_locked(config, root)
+                # Never mutate the station's returned dictionary; it may be
+                # retained as a projection or reused by a subsequent run.
+                results = dict(dns_shared.reconcile_locked(config, root))
                 for key, n in dns_destinations.reconcile_all(config, root).items():
                     results[key] = results.get(key, 0) + n
     except ValueError:
