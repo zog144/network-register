@@ -33,8 +33,13 @@ Existing Cloudflare/Porkbun interfaces remain compatible. The earlier
 Station-access's central host-registry reconciler uses this library to maintain
 owned host A records. Host-discover supplies authenticated host reports;
 station-access verifies inventory and decides desired DNS state. Host-deploy
-owns AWS provisioning. Network-register does not run a background worker or
-verify cloud ownership itself.
+owns AWS provisioning. Network-register does not independently verify cloud ownership or invent a
+second DNS writer. A separately staged **shared-controller scheduled worker**
+adapts to the installed station-access controller, which remains the owner
+of the lock, ledger, protected credentials and signed host/AWS observations.
+The worker is inspection-only by default, and requires explicit reviewed
+installation/activation for applying record changes. See
+[shared DNS worker and timer](docs/network-register/SHARED-DNS-WORKER.md).
 
 This is the standalone development repository. Its Python component installs at
 `zog.network_register` for local development, but public Python publication occurs
