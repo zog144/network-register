@@ -28,7 +28,7 @@ COUNT_KEYS = frozenset({
 })
 SAFE_CODES = frozenset({
     "permission", "conflict", "storage", "transient", "authentication",
-    "rate-limit", "validation", "not-found", "unsupported",
+    "rate-limit", "validation", "not-found", "unsupported", "uncertain",
 })
 
 
